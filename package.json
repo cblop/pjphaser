@@ -8,7 +8,9 @@
   "repository": "",
   "dependencies": {},
   "browser": {
-    "phaser": "./src/bower_components/phaser-official/build/phaser.min.js"
+    "phaser": "./src/bower_components/phaser-official/build/phaser.min.js",
+    "strophe": "./src/bower_components/strophe/strophe.min.js",
+    "pubsub": "./src/bower_components/strophejs-plugins/pubsub/strophe.pubsub.js"
   },
   "browserify": {
     "transform": [
@@ -17,7 +19,8 @@
     ]
   },
   "browserify-shim": {
-    "phaser": "Phaser"
+    "phaser": "Phaser",
+    "strophe": "global:STROPHE"
   },
   "devDependencies": {
     "browser-sync": "~0.8.2",

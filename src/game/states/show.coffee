@@ -2,6 +2,7 @@ Puppet = require '../puppet'
 MoveEvent = require '../moveEvent'
 SpeakEvent = require '../speakEvent'
 EventHandler = require '../eventHandler'
+XmppSub = require '../xmppsub'
 
 class Show
   addAnims: ->
@@ -19,6 +20,11 @@ class Show
     @policeSound = @add.audio 'police'
 
   create: ->
+    @xmppsub = new XmppSub('http://localhost:5280/http-bind/')
+
+    #@xmppsub.conn.options.sync = true
+    #@pubsub = new PubSub('/http-bind/')
+
     @addAnims()
     @addSounds()
     @puppets = []
@@ -28,7 +34,7 @@ class Show
 
     @ev = new MoveEvent(@police, 1000, 0)
     @ev2 = new MoveEvent(@police, 2000, 700)
-    @ev3 = new SpeakEvent(@police, 3000)
+    @ev3 = new SpeakEvent(@police, 8000)
     @eh = new EventHandler(@game)
     @eh.addEvent(@ev)
     @eh.addEvent(@ev2)
