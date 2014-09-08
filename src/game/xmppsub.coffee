@@ -1,9 +1,12 @@
 STROPHE = require 'strophe'
 StrPub = require 'pubsub'
+MoveEvent = require './moveEvent'
+SpeakEvent = require './speakEvent'
+AnimEvent = require './animEvent'
 
 class XmppSub
-  constructor: (@server) ->
-    @node = 'evnode'
+  constructor: (@server, @eventHandler, @context) ->
+    @node = 'events'
     @conn = new Strophe.Connection(@server)
     @conn.connect 'anim@localhost', 'animuser', @onConnect
 
@@ -30,7 +33,39 @@ class XmppSub
     @conn.pubsub.subscribe(@node, null, @onEvent, @onSubscribed, @onError, false)
 
   onEvent: (message) =>
-    console.log (message.getElementsByTagName 'JSON')[0]
+    jsonString = (message.getElementsByTagName 'JSON')[0].innerHTML
+    eventObj = JSON.parse(jsonString)
+    functor = eventObj['FUNCTOR']
+    agent = eventObj['AGENT']
+    value = eventObj['VALUE']
+    console.log jsonString
+
+    puppet = @context.punch
+    for p in @context.puppets
+      if p.name == agent
+        puppet = p
+
+    if functor == 'move'
+      console.log 'move: ' + puppet.name + ' to: ' + value
+      target = OFFSTAGELEFT
+      switch value
+        when 'offstageLeft' then target = OFFSTAGELEFT
+        when 'offstageRight' then target = OFFSTAGERIGHT
+        when 'stageLeft' then target = STAGELEFT
+        when 'stageRight' then target = STAGERIGHT
+        when 'stageCentre' then target = STAGECENTRE
+        else target = OFFSTAGELEFT
+
+      mv = new MoveEvent(puppet, 0, target)
+      @eventHandler.addEvent(mv)
+
+    else if functor == 'say'
+      puppet.emotion = value
+      @eventHandler.addEvent(new SpeakEvent(puppet, 0))
+
+    else if functor == 'anim'
+      @eventHandler.addEvent(new AnimEvent(puppet, 0, value))
+
     true
 
   onSubscribed: =>

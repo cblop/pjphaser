@@ -8,15 +8,15 @@ class Show
   addAnims: ->
     x = @game.width / 2
     y = @game.height / 2
-    @punchSprite = @add.sprite x, y + 30, 'punch'
+    @punchSprite = @add.sprite OFFSTAGELEFT, y + 30, 'punch'
     @punchSprite.anchor.setTo 0.5, 0.5
-    @punchSprite.animations.add 'side', [0], 2, true
+    @punchSprite.animations.add 'rest', [0], 2, true
     @punchSprite.animations.add 'hit', [2, 3], 10, true
     @punchSprite.animations.add 'front', [4], 2, true
 
-    @policeSprite = @add.sprite x, y, 'police'
+    @policeSprite = @add.sprite OFFSTAGERIGHT, y, 'police'
     @policeSprite.anchor.setTo 0.5, 0.5
-    @policeSprite.animations.add 'side', [0], 2, true
+    @policeSprite.animations.add 'rest', [0], 2, true
     @policeSprite.animations.add 'hit', [3, 4, 5], 10, true
     @policeSprite.animations.add 'front', [6], 2, true
     @policeSprite.animations.add 'point', [9], 2, true
@@ -58,7 +58,6 @@ class Show
 
     @reactionText = 'Audience Reacts!'
 
-    @xmppsub = new XmppSub('http://localhost:5280/http-bind/')
 
     #@xmppsub.conn.options.sync = true
     #@pubsub = new PubSub('/http-bind/')
@@ -74,13 +73,9 @@ class Show
     @puppets.push(@punch)
     @puppets.push(@police)
 
-    @ev = new MoveEvent(@police, 1000, 100)
-    @ev2 = new MoveEvent(@punch, 2000, 700)
-    @ev3 = new SpeakEvent(@police, 2000)
-    @ev4 = new SpeakEvent(@police, 3000)
     @eh = new EventHandler(@game)
-    @eh.addEvent(@ev)
-    @eh.addEvent(@ev2)
+
+    @xmppsub = new XmppSub('http://localhost:5280/http-bind/', @eh, this)
 
     @add.sprite 0, 0, 'curtains'
 

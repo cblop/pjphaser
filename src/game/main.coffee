@@ -2,6 +2,11 @@ window.onload = ->
   'use strict'
 
   Phaser = require 'phaser'
+  @OFFSTAGELEFT = 0
+  @OFFSTAGERIGHT = 800
+  @STAGELEFT = 200
+  @STAGERIGHT = 650
+  @STAGECENTRE = 400
 
   game = new Phaser.Game 800, 600, Phaser.AUTO, 'pj-coffee'
 
