@@ -2,7 +2,7 @@ Puppet = require '../puppet'
 MoveEvent = require '../moveEvent'
 SpeakEvent = require '../speakEvent'
 EventHandler = require '../eventHandler'
-XmppSub = require '../xmppsub'
+PubSub = require '../pubsub'
 
 class Show
   addAnims: ->
@@ -75,7 +75,7 @@ class Show
 
     @eh = new EventHandler(@game)
 
-    @xmppsub = new XmppSub('http://localhost:5280/http-bind/', @eh, this)
+    @pubsub = new PubSub('http://localhost:5280/http-bind/', @eh, this)
 
     @add.sprite 0, 0, 'curtains'
 
@@ -87,6 +87,7 @@ class Show
   update: ->
     if @game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)
       @audienceText.text = @reactionText
+      @pubsub.publish {agent: 'director', functor: 'input', value: 'noise'}
     else
       @audienceText.text = ""
 

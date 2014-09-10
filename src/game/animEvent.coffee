@@ -7,6 +7,7 @@ class AnimEvent extends Event
 
   trigger: ->
     if @anim == 'turn'
+      @puppet.anim = 'rest'
       @puppet.changeDirection()
     else
       @puppet.anim = @anim

@@ -40,12 +40,12 @@ class Puppet
       @direction = 'left'
 
 
-  sayLine: ->
+  sayLine: (speech) ->
     @audio.play()
     @speaking = true
-    rand = Math.floor(Math.random() * @lines[@emotion].length)
+    rand = Math.floor(Math.random() * @lines[speech].length)
     @subtitle.x = -1000
-    @subtitle.text = @lines[@emotion][rand]
+    @subtitle.text = @lines[speech][rand]
     @sprite.game.time.events.add(1000, @clearLines, this)
 
   clearLines: ->
