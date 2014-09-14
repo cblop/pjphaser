@@ -98,6 +98,7 @@ class PubSub
     console.log "SUBSCRIBED to " + @node
     @conn.addHandler(@onEvent, null, 'message', null, null, null)
     @conn.addHandler(@debugHandler, null, null, null, null, null)
+    @publish {agent: 'director', functor:'start', value: 'start'}
 
   debugHandler:(iq) =>
     #console.log iq
