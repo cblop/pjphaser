@@ -53,7 +53,7 @@ class Show
     @policeLines = @readFile('police')
 
   create: ->
-    @game.stage.backgroundColor = '#000000'
+    #@game.stage.backgroundColor = '#000000'
     @add.sprite 0, 0, 'backdrop'
 
     @reactionText = 'Audience Reacts!'
@@ -74,8 +74,7 @@ class Show
     @puppets.push(@police)
 
     @eh = new EventHandler(@game)
-
-    @pubsub = new PubSub('http://localhost:5280/http-bind/', @eh, this)
+    @pubsub = new PubSub('http://cblop.com:5280/http-bind/', @eh, this)
 
     @add.sprite 0, 0, 'curtains'
 
@@ -85,7 +84,8 @@ class Show
     @audienceText.x = @game.width / 2 - @audienceText.textWidth / 2
 
   update: ->
-    if @game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)
+    noise = @game.mic.getSamples()
+    if @game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR) or noise > 0
       @audienceText.text = @reactionText
       @pubsub.publish {agent: 'director', functor: 'input', value: 'noise'}
     else

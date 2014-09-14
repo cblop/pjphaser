@@ -8,7 +8,7 @@ class PubSub
   constructor: (@server, @eventHandler, @context) ->
     @node = 'events'
     @conn = new Strophe.Connection(@server)
-    @conn.connect 'anim@localhost', 'animuser', @onConnect
+    @conn.connect 'anim@cblop.com', 'animuser', @onConnect
 
   onConnect: (status) =>
     switch status
@@ -16,10 +16,12 @@ class PubSub
         console.log "CONNECTING"
       when Strophe.Status.CONNFAIL
         console.log "CONNFAIL"
+        @onError()
       when Strophe.Status.DISCONNECTING
         console.log "DISCONNECTING"
       when Strophe.Status.DISCONNECTED
         console.log "DISCONNECTED"
+        @onError()
       when Strophe.Status.CONNECTED
         console.log "CONNECTED"
         #@conn.pubsub.connect('punch@localhost', null)
@@ -69,7 +71,7 @@ class PubSub
         puppet = p
 
     if functor == 'move'
-      console.log 'move: ' + puppet.name + ' to: ' + value
+      #console.log 'move: ' + puppet.name + ' to: ' + value
       target = OFFSTAGELEFT
       switch value
         when 'offstageLeft' then target = OFFSTAGELEFT
@@ -83,13 +85,17 @@ class PubSub
       @eventHandler.addEvent(mv)
 
     else if functor == 'say'
+      #console.log 'puppet: ' + puppet.name + ' says: ' + value
       @eventHandler.addEvent(new SpeakEvent(puppet, 0, value))
 
     else if functor == 'anim'
+      #console.log 'puppet: ' + puppet.name + ' anim: ' + value
       @eventHandler.addEvent(new AnimEvent(puppet, 0, value))
 
     else if functor == 'emotion'
+      #console.log 'puppet: ' + puppet.name + ' emotion: ' + value
       puppet.emotion = value
+    console.log agent + ', ' + functor + ', ' + value
 
 
     true
@@ -106,6 +112,7 @@ class PubSub
 
   onError: =>
     console.log "Failed to subscribe to " + @node
+    @context.game.state.start 'error'
     #@conn.pubsub.createNode(@node)
 
 module.exports = PubSub

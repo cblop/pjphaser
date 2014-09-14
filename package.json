@@ -4,8 +4,6 @@
   "readme": "",
   "repository": "",
   "version": "0.0.0",
-  "readme": "",
-  "repository": "",
   "dependencies": {},
   "browser": {
     "phaser": "./src/bower_components/phaser-official/build/phaser.min.js",
@@ -42,7 +40,6 @@
   "scripts": {
     "post-install": "node ./node_modules/bower/bin/bower install",
     "start": "node ./node_modules/gulp/bin/gulp.js",
-
     "build": "node ./node_modules/gulp/bin/gulp.js build"
   }
 }
