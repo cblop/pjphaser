@@ -11,8 +11,8 @@ class Show
     @punchSprite = @add.sprite OFFSTAGELEFT, y + 30, 'punch'
     @punchSprite.anchor.setTo 0.5, 0.5
     @punchSprite.animations.add 'rest', [0], 2, true
-    @punchSprite.animations.add 'hit', [2, 3], 10, true
-    @punchSprite.animations.add 'front', [4], 2, true
+    @punchSprite.animations.add 'hit', [4, 5], 10, true
+    @punchSprite.animations.add 'front', [2], 2, true
 
     @policeSprite = @add.sprite OFFSTAGERIGHT, y, 'police'
     @policeSprite.anchor.setTo 0.5, 0.5
@@ -75,6 +75,7 @@ class Show
 
     @eh = new EventHandler(@game)
     @pubsub = new PubSub('http://cblop.com:5280/http-bind/', @eh, this)
+    #@pubsub = new PubSub('http://localhost:5280/http-bind/', @eh, this)
 
     @add.sprite 0, 0, 'curtains'
 
