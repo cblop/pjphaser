@@ -11,8 +11,8 @@ class Show
     @punchSprite = @add.sprite OFFSTAGELEFT, y + 30, 'punch'
     @punchSprite.anchor.setTo 0.5, 0.5
     @punchSprite.animations.add 'rest', [0], 2, true
-    @punchSprite.animations.add 'hit', [4, 5], 10, true
     @punchSprite.animations.add 'front', [2], 2, true
+    @punchSprite.animations.add 'hit', [4, 5], 10, true
 
     @policeSprite = @add.sprite OFFSTAGERIGHT, y, 'police'
     @policeSprite.anchor.setTo 0.5, 0.5

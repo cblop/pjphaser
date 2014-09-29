@@ -805,7 +805,7 @@ PubSub = (function() {
     this.onEvent = __bind(this.onEvent, this);
     this.onPublished = __bind(this.onPublished, this);
     this.onConnect = __bind(this.onConnect, this);
-    this.node = 'puppets';
+    this.node = 'ev';
     this.conn = new Strophe.Connection(this.server);
     this.conn.connect('anim@cblop.com', 'animuser', this.onConnect);
   }
@@ -1282,8 +1282,8 @@ Show = (function() {
     this.punchSprite = this.add.sprite(OFFSTAGELEFT, y + 30, 'punch');
     this.punchSprite.anchor.setTo(0.5, 0.5);
     this.punchSprite.animations.add('rest', [0], 2, true);
-    this.punchSprite.animations.add('hit', [2, 3], 10, true);
-    this.punchSprite.animations.add('front', [4], 2, true);
+    this.punchSprite.animations.add('front', [2], 2, true);
+    this.punchSprite.animations.add('hit', [4, 5], 10, true);
     this.policeSprite = this.add.sprite(OFFSTAGERIGHT, y, 'police');
     this.policeSprite.anchor.setTo(0.5, 0.5);
     this.policeSprite.animations.add('rest', [0], 2, true);

@@ -6,7 +6,7 @@ AnimEvent = require './animEvent'
 
 class PubSub
   constructor: (@server, @eventHandler, @context) ->
-    @node = 'puppets'
+    @node = 'ev'
     @conn = new Strophe.Connection(@server)
     @conn.connect 'anim@cblop.com', 'animuser', @onConnect
     #@conn.connect 'anim@localhost', 'animuser', @onConnect
