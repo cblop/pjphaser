@@ -14,6 +14,23 @@ class Show
     @punchSprite.animations.add 'front', [2], 2, true
     @punchSprite.animations.add 'hit', [4, 5], 10, true
 
+    @judySprite = @add.sprite OFFSTAGERIGHT, y, 'judy'
+    @judySprite.anchor.setTo 0.5, 0.5
+    @judySprite.animations.add 'rest', [0], 2, true
+    @judySprite.animations.add 'front', [1], 2, true
+    @judySprite.animations.add 'babyside', [2], 2, true
+    @judySprite.animations.add 'babyfront', [3], 2, true
+
+    @babySprite = @add.sprite OFFSTAGERIGHT, y, 'baby'
+    @babySprite.anchor.setTo 0.5, 0.5
+    @babySprite.animations.add 'rest', [0], 2, true
+    @babySprite.animations.add 'front', [1], 2, true
+
+    @crocSprite = @add.sprite OFFSTAGERIGHT, y, 'croc'
+    @crocSprite.anchor.setTo 0.5, 0.5
+    @crocSprite.animations.add 'rest', [0], 2, true
+    @crocSprite.animations.add 'snap', [0, 1], 10, true
+
     @policeSprite = @add.sprite OFFSTAGERIGHT, y, 'police'
     @policeSprite.anchor.setTo 0.5, 0.5
     @policeSprite.animations.add 'rest', [0], 2, true
@@ -22,9 +39,19 @@ class Show
     @policeSprite.animations.add 'point', [9], 2, true
     @policeSprite.animations.add 'dead', [12], 2, true
 
+    @joeySprite = @add.sprite OFFSTAGERIGHT, y, 'joey'
+    @joeySprite.anchor.setTo 0.5, 0.5
+    @joeySprite.animations.add 'rest', [0], 2, true
+    @joeySprite.animations.add 'front', [2], 2, true
+    @joeySprite.animations.add 'hit', [4, 5], 10, true
+    @joeySprite.animations.add 'dead', [6], 2, true
+
   addSounds: ->
     @punchSound = @add.audio 'punch'
+    @judySound = @add.audio 'judy'
+    @babySound = @add.audio 'baby'
     @policeSound = @add.audio 'police'
+    @joeySound = @add.audio 'joey'
 
   readFile: (fname) ->
     textBlob = @game.cache.getText fname
@@ -50,7 +77,9 @@ class Show
   addLines: ->
     @punchLines = @readFile('punch')
     @judyLines = @readFile('judy')
+    @babyLines = @readFile('baby')
     @policeLines = @readFile('police')
+    @joeyLines = @readFile('joey')
 
   create: ->
     #@game.stage.backgroundColor = '#000000'
@@ -68,13 +97,19 @@ class Show
 
     @puppets = []
     @punch = new Puppet('punch', @punchSprite, @punchLines, @punchSound)
+    @judy = new Puppet('judy', @judySprite, @judyLines, @judySound)
+    @baby = new Puppet('baby', @babySprite, @babyLines, @babySound)
+    @joey = new Puppet('joey', @joeySprite, @joeyLines, @joeySound)
     @police = new Puppet('police', @policeSprite, @policeLines, @policeSound)
 
     @puppets.push(@punch)
+    @puppets.push(@judy)
+    @puppets.push(@baby)
+    @puppets.push(@joey)
     @puppets.push(@police)
 
     @eh = new EventHandler(@game)
-    @pubsub = new PubSub('http://cblop.com:5280/http-bind/', @eh, this)
+    @pubsub = new PubSub('http://localhost:5280/http-bind/', @eh, this)
     #@pubsub = new PubSub('http://localhost:5280/http-bind/', @eh, this)
 
     @add.sprite 0, 0, 'curtains'

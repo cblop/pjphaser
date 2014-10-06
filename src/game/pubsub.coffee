@@ -8,7 +8,7 @@ class PubSub
   constructor: (@server, @eventHandler, @context) ->
     @node = 'ev'
     @conn = new Strophe.Connection(@server)
-    @conn.connect 'anim@cblop.com', 'animuser', @onConnect
+    @conn.connect 'anim@localhost', 'animuser', @onConnect
     #@conn.connect 'anim@localhost', 'animuser', @onConnect
 
   onConnect: (status) =>
@@ -71,7 +71,7 @@ class PubSub
       if p.name == agent
         puppet = p
 
-    if functor == 'move'
+    if functor == 'move' or functor == 'appear'
       #console.log 'move: ' + puppet.name + ' to: ' + value
       target = OFFSTAGELEFT
       switch value
@@ -82,8 +82,10 @@ class PubSub
         when 'stageCentre' then target = STAGECENTRE
         else target = OFFSTAGELEFT
 
+      if functor == 'appear' then puppet.sprite.x = target
       mv = new MoveEvent(puppet, 0, target)
       @eventHandler.addEvent(mv)
+
 
     else if functor == 'say'
       #console.log 'puppet: ' + puppet.name + ' says: ' + value

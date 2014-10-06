@@ -3,7 +3,7 @@ window.onload = ->
 
   Phaser = require 'phaser'
   @OFFSTAGELEFT = 0
-  @OFFSTAGERIGHT = 800
+  @OFFSTAGERIGHT = 1000
   @STAGELEFT = 200
   @STAGERIGHT = 650
   @STAGECENTRE = 400

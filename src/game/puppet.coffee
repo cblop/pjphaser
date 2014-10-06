@@ -41,7 +41,7 @@ class Puppet
 
 
   sayLine: (speech) ->
-    @audio.play()
+    #@audio.play()
     @speaking = true
     rand = Math.floor(Math.random() * @lines[speech].length)
     @subtitle.x = -1000

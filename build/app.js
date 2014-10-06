@@ -667,7 +667,7 @@ window.onload = function() {
   var Phaser, game;
   Phaser = require('phaser');
   this.OFFSTAGELEFT = 0;
-  this.OFFSTAGERIGHT = 800;
+  this.OFFSTAGERIGHT = 1000;
   this.STAGELEFT = 200;
   this.STAGERIGHT = 650;
   this.STAGECENTRE = 400;
@@ -807,7 +807,7 @@ PubSub = (function() {
     this.onConnect = __bind(this.onConnect, this);
     this.node = 'ev';
     this.conn = new Strophe.Connection(this.server);
-    this.conn.connect('anim@cblop.com', 'animuser', this.onConnect);
+    this.conn.connect('anim@localhost', 'animuser', this.onConnect);
   }
 
   PubSub.prototype.onConnect = function(status) {
@@ -869,7 +869,7 @@ PubSub = (function() {
         puppet = p;
       }
     }
-    if (functor === 'move') {
+    if (functor === 'move' || functor === 'appear') {
       target = OFFSTAGELEFT;
       switch (value) {
         case 'offstageLeft':
@@ -889,6 +889,9 @@ PubSub = (function() {
           break;
         default:
           target = OFFSTAGELEFT;
+      }
+      if (functor === 'appear') {
+        puppet.sprite.x = target;
       }
       mv = new MoveEvent(puppet, 0, target);
       this.eventHandler.addEvent(mv);
@@ -988,7 +991,6 @@ Puppet = (function() {
 
   Puppet.prototype.sayLine = function(speech) {
     var rand;
-    this.audio.play();
     this.speaking = true;
     rand = Math.floor(Math.random() * this.lines[speech].length);
     this.subtitle.x = -1000;
@@ -1229,12 +1231,20 @@ Preloader = (function() {
     this.load.image('curtains', 'assets/images/stage1.png');
     this.load.spritesheet('punch', 'assets/images/punch.png', 512, 512);
     this.load.spritesheet('police', 'assets/images/police.png', 512, 512);
+    this.load.spritesheet('judy', 'assets/images/judy.png', 512, 512);
+    this.load.spritesheet('joey', 'assets/images/joey.png', 512, 512);
+    this.load.spritesheet('baby', 'assets/images/baby.png', 512, 512);
+    this.load.spritesheet('croc', 'assets/images/croc.png', 512, 512);
     this.load.bitmapFont('minecraftia', 'assets/fonts/minecraftia.png', 'assets/fonts/minecraftia.xml');
     this.load.audio('punch', 'assets/sounds/punch.mp3', 'assets/sounds/punch.ogg');
     this.load.audio('judy', 'assets/sounds/judy.mp3', 'assets/sounds/judy.ogg');
+    this.load.audio('joey', 'assets/sounds/joey.mp3', 'assets/sounds/joey.ogg');
+    this.load.audio('baby', 'assets/sounds/baby.mp3', 'assets/sounds/baby.ogg');
     this.load.audio('police', 'assets/sounds/police.mp3', 'assets/sounds/police.ogg');
     this.load.text('punch', 'assets/sounds/punch.csv');
     this.load.text('judy', 'assets/sounds/judy.csv');
+    this.load.text('joey', 'assets/sounds/joey.csv');
+    this.load.text('baby', 'assets/sounds/baby.csv');
     return this.load.text('police', 'assets/sounds/police.csv');
   };
 
@@ -1284,18 +1294,41 @@ Show = (function() {
     this.punchSprite.animations.add('rest', [0], 2, true);
     this.punchSprite.animations.add('front', [2], 2, true);
     this.punchSprite.animations.add('hit', [4, 5], 10, true);
+    this.judySprite = this.add.sprite(OFFSTAGERIGHT, y, 'judy');
+    this.judySprite.anchor.setTo(0.5, 0.5);
+    this.judySprite.animations.add('rest', [0], 2, true);
+    this.judySprite.animations.add('front', [1], 2, true);
+    this.judySprite.animations.add('babyside', [2], 2, true);
+    this.judySprite.animations.add('babyfront', [3], 2, true);
+    this.babySprite = this.add.sprite(OFFSTAGERIGHT, y, 'baby');
+    this.babySprite.anchor.setTo(0.5, 0.5);
+    this.babySprite.animations.add('rest', [0], 2, true);
+    this.babySprite.animations.add('front', [1], 2, true);
+    this.crocSprite = this.add.sprite(OFFSTAGERIGHT, y, 'croc');
+    this.crocSprite.anchor.setTo(0.5, 0.5);
+    this.crocSprite.animations.add('rest', [0], 2, true);
+    this.crocSprite.animations.add('snap', [0, 1], 10, true);
     this.policeSprite = this.add.sprite(OFFSTAGERIGHT, y, 'police');
     this.policeSprite.anchor.setTo(0.5, 0.5);
     this.policeSprite.animations.add('rest', [0], 2, true);
     this.policeSprite.animations.add('hit', [3, 4, 5], 10, true);
     this.policeSprite.animations.add('front', [6], 2, true);
     this.policeSprite.animations.add('point', [9], 2, true);
-    return this.policeSprite.animations.add('dead', [12], 2, true);
+    this.policeSprite.animations.add('dead', [12], 2, true);
+    this.joeySprite = this.add.sprite(OFFSTAGERIGHT, y, 'joey');
+    this.joeySprite.anchor.setTo(0.5, 0.5);
+    this.joeySprite.animations.add('rest', [0], 2, true);
+    this.joeySprite.animations.add('front', [2], 2, true);
+    this.joeySprite.animations.add('hit', [4, 5], 10, true);
+    return this.joeySprite.animations.add('dead', [6], 2, true);
   };
 
   Show.prototype.addSounds = function() {
     this.punchSound = this.add.audio('punch');
-    return this.policeSound = this.add.audio('police');
+    this.judySound = this.add.audio('judy');
+    this.babySound = this.add.audio('baby');
+    this.policeSound = this.add.audio('police');
+    return this.joeySound = this.add.audio('joey');
   };
 
   Show.prototype.readFile = function(fname) {
@@ -1323,7 +1356,9 @@ Show = (function() {
   Show.prototype.addLines = function() {
     this.punchLines = this.readFile('punch');
     this.judyLines = this.readFile('judy');
-    return this.policeLines = this.readFile('police');
+    this.babyLines = this.readFile('baby');
+    this.policeLines = this.readFile('police');
+    return this.joeyLines = this.readFile('joey');
   };
 
   Show.prototype.create = function() {
@@ -1334,11 +1369,17 @@ Show = (function() {
     this.addLines();
     this.puppets = [];
     this.punch = new Puppet('punch', this.punchSprite, this.punchLines, this.punchSound);
+    this.judy = new Puppet('judy', this.judySprite, this.judyLines, this.judySound);
+    this.baby = new Puppet('baby', this.babySprite, this.babyLines, this.babySound);
+    this.joey = new Puppet('joey', this.joeySprite, this.joeyLines, this.joeySound);
     this.police = new Puppet('police', this.policeSprite, this.policeLines, this.policeSound);
     this.puppets.push(this.punch);
+    this.puppets.push(this.judy);
+    this.puppets.push(this.baby);
+    this.puppets.push(this.joey);
     this.puppets.push(this.police);
     this.eh = new EventHandler(this.game);
-    this.pubsub = new PubSub('http://cblop.com:5280/http-bind/', this.eh, this);
+    this.pubsub = new PubSub('http://localhost:5280/http-bind/', this.eh, this);
     this.add.sprite(0, 0, 'curtains');
     this.audienceText = this.add.bitmapText(this.game.width / 2, this.game.height / 2, 'minecraftia', this.reactionText);
     this.audienceText.tint = 0xFFFF00;

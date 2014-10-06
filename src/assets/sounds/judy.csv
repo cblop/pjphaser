@@ -1,4 +1,4 @@
-:greeting
+:hello
 Hello hello hello!;judy/judy-hello
 :happy
 Good to see you, my dear!;judy/judy-happy1
@@ -17,3 +17,20 @@ Someone help me!;judy/judy-distressed2
 Police!;judy/judy-distressed3
 Stop!;judy/judy-distressed4
 Noooooo!;judy/judy-distressed5
+:seepunch
+Do you want to see Mr. Punch?;judy/judy-seepunch
+:seepunchResponse
+He's downstairs. I'll call him.;judy/judy-seepunchResponse
+:seepunchNoResponse
+You don't want to see him?;judy/judy-noseepunchNoResponse1
+I didn't hear anything.;judy/judy-noseepunchNoResponse2
+:callpunch
+Yoohoo! Mr. Punch!;judy/judy-callpunch1
+Where are you, Mr. Punch? Come here!;judy/judy-callpunch2
+:giveUp
+That's it. I give up.;judy/judy-giveup
+:getBaby
+Shall I go and get the baby?;judy/judy-baby
+Do you want to see the baby?;judy/judy-baby
+:lookAfterBaby
+Punch, please look after the baby.;judy/judy-lookafter
