@@ -805,7 +805,7 @@ PubSub = (function() {
     this.onEvent = __bind(this.onEvent, this);
     this.onPublished = __bind(this.onPublished, this);
     this.onConnect = __bind(this.onConnect, this);
-    this.node = 'ev';
+    this.node = 'NODE_PERCEPT';
     this.conn = new Strophe.Connection(this.server);
     this.conn.connect('anim@localhost', 'animuser', this.onConnect);
   }

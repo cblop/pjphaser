@@ -6,7 +6,7 @@ AnimEvent = require './animEvent'
 
 class PubSub
   constructor: (@server, @eventHandler, @context) ->
-    @node = 'ev'
+    @node = 'NODE_PERCEPT'
     @conn = new Strophe.Connection(@server)
     @conn.connect 'anim@localhost', 'animuser', @onConnect
     #@conn.connect 'anim@localhost', 'animuser', @onConnect
