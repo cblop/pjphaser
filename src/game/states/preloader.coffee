@@ -12,6 +12,9 @@ class Preloader
     @load.image 'backdrop', 'assets/images/stage2.png'
     @load.image 'curtains', 'assets/images/stage1.png'
 
+    @load.image 'cheerButton', 'assets/images/cheerButton.png'
+    @load.image 'booButton', 'assets/images/booButton.png'
+
     @load.spritesheet 'punch', 'assets/images/punch.png', 512, 512
     @load.spritesheet 'police', 'assets/images/police.png', 512, 512
     @load.spritesheet 'judy', 'assets/images/judy.png', 512, 512

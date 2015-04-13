@@ -19,13 +19,13 @@ class Menu
 
     y = y + @titleTxt.height + 20
 
-    @instTxt = @add.bitmapText(x, y, 'minecraftia', 'Cheer the puppets on by', 20)
+    @instTxt = @add.bitmapText(x, y, 'minecraftia', 'Cheer or boo at the puppets by', 20)
     @instTxt.align = 'center'
     #@instTxt.fontSize = 15
     @instTxt.x = @game.width / 2 - @instTxt.textWidth / 2
 
     y = y + @instTxt.height
-    @spaceTxt = @add.bitmapText(x, y, 'minecraftia', 'pressing the space bar', 20)
+    @spaceTxt = @add.bitmapText(x, y, 'minecraftia', 'clicking the buttons', 20)
     @spaceTxt.align = 'center'
     @spaceTxt.x = @game.width / 2 - @spaceTxt.textWidth / 2
 
@@ -43,7 +43,7 @@ class Menu
 
     @input.onDown.add @onDown, this
 
-    @game.mic = new MicInput(@conf)
+    #@game.mic = new MicInput(@conf)
 
   conf: =>
     @micTxt.text = 'or shouting into the microphone'

@@ -71,7 +71,7 @@ class Show
         lines[key] = dlist
 
     lines
-        
+
 
 
   addLines: ->
@@ -81,11 +81,18 @@ class Show
     @policeLines = @readFile('police')
     @joeyLines = @readFile('joey')
 
+  cheerHandler: =>
+    @pubsub.publish {agent: 'audience', functor: 'response', value: 'cheer'}
+
+  booHandler: =>
+    @pubsub.publish {agent: 'audience', functor: 'response', value: 'boo'}
+
   create: ->
     #@game.stage.backgroundColor = '#000000'
     @add.sprite 0, 0, 'backdrop'
 
-    @reactionText = 'Audience Reacts!'
+    @reactionText = ''
+    #@reactionText = 'Audience Reacts!'
 
 
     #@xmppsub.conn.options.sync = true
@@ -119,15 +126,20 @@ class Show
     @audienceText.align = 'center'
     @audienceText.x = @game.width / 2 - @audienceText.textWidth / 2
 
+    @cheerButton = @game.add.button(200, @game.height - 80, 'cheerButton', @cheerHandler, this, 2, 1, 0)
+    @booButton = @game.add.button(@game.width - 300, @game.height - 80, 'booButton', @booHandler, this, 2, 1, 0)
+
   update: ->
+    puppet.update() for puppet in @puppets
+    ###
     noise = @game.mic.getSamples()
     if @game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR) or noise > 0
       @audienceText.text = @reactionText
       @pubsub.publish {agent: 'director', functor: 'input', value: 'noise'}
     else
       @audienceText.text = ""
+    ###
 
-    puppet.update() for puppet in @puppets
 
 
 module.exports = Show

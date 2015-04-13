@@ -841,7 +841,7 @@ PubSub = (function() {
   PubSub.prototype.publish = function(message, onPublished) {
     var jsonString, msg, xml;
     this.onPublished = onPublished;
-    jsonString = '{"AGENT": "' + message.agent + '", "FUNCTOR": "' + message.functor + '", "VALUE": "' + message.value + '"}';
+    jsonString = '{"AGENT": "' + message.agent + '", "FUNCTOR": "' + message.functor + '", "VALUE": ["' + message.value + ']"}';
     xml = $build('JSON', {}).t(jsonString).tree();
     msg = {
       attrs: {},
@@ -1174,11 +1174,11 @@ Menu = (function() {
     this.titleTxt.tint = 0xffff00;
     this.titleTxt.x = this.game.width / 2 - this.titleTxt.textWidth / 2;
     y = y + this.titleTxt.height + 20;
-    this.instTxt = this.add.bitmapText(x, y, 'minecraftia', 'Cheer the puppets on by', 20);
+    this.instTxt = this.add.bitmapText(x, y, 'minecraftia', 'Cheer or boo at the puppets by', 20);
     this.instTxt.align = 'center';
     this.instTxt.x = this.game.width / 2 - this.instTxt.textWidth / 2;
     y = y + this.instTxt.height;
-    this.spaceTxt = this.add.bitmapText(x, y, 'minecraftia', 'pressing the space bar', 20);
+    this.spaceTxt = this.add.bitmapText(x, y, 'minecraftia', 'clicking the buttons', 20);
     this.spaceTxt.align = 'center';
     this.spaceTxt.x = this.game.width / 2 - this.spaceTxt.textWidth / 2;
     y = y + this.spaceTxt.height;
@@ -1191,8 +1191,7 @@ Menu = (function() {
     this.startTxt.align = 'center';
     this.startTxt.tint = 0xffff00;
     this.startTxt.x = this.game.width / 2 - this.startTxt.textWidth / 2;
-    this.input.onDown.add(this.onDown, this);
-    return this.game.mic = new MicInput(this.conf);
+    return this.input.onDown.add(this.onDown, this);
   };
 
   Menu.prototype.conf = function() {
@@ -1229,6 +1228,8 @@ Preloader = (function() {
     this.load.setPreloadSprite(this.asset);
     this.load.image('backdrop', 'assets/images/stage2.png');
     this.load.image('curtains', 'assets/images/stage1.png');
+    this.load.image('cheerButton', 'assets/images/cheerButton.png');
+    this.load.image('booButton', 'assets/images/booButton.png');
     this.load.spritesheet('punch', 'assets/images/punch.png', 512, 512);
     this.load.spritesheet('police', 'assets/images/police.png', 512, 512);
     this.load.spritesheet('judy', 'assets/images/judy.png', 512, 512);
@@ -1270,7 +1271,8 @@ module.exports = Preloader;
 
 
 },{}],17:[function(require,module,exports){
-var EventHandler, MoveEvent, PubSub, Puppet, Show, SpeakEvent;
+var EventHandler, MoveEvent, PubSub, Puppet, Show, SpeakEvent,
+  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
 Puppet = require('../puppet');
 
@@ -1283,7 +1285,10 @@ EventHandler = require('../eventHandler');
 PubSub = require('../pubsub');
 
 Show = (function() {
-  function Show() {}
+  function Show() {
+    this.booHandler = __bind(this.booHandler, this);
+    this.cheerHandler = __bind(this.cheerHandler, this);
+  }
 
   Show.prototype.addAnims = function() {
     var x, y;
@@ -1361,9 +1366,25 @@ Show = (function() {
     return this.joeyLines = this.readFile('joey');
   };
 
+  Show.prototype.cheerHandler = function() {
+    return this.pubsub.publish({
+      agent: 'audience',
+      functor: 'response',
+      value: 'cheer'
+    });
+  };
+
+  Show.prototype.booHandler = function() {
+    return this.pubsub.publish({
+      agent: 'audience',
+      functor: 'response',
+      value: 'boo'
+    });
+  };
+
   Show.prototype.create = function() {
     this.add.sprite(0, 0, 'backdrop');
-    this.reactionText = 'Audience Reacts!';
+    this.reactionText = '';
     this.addAnims();
     this.addSounds();
     this.addLines();
@@ -1384,22 +1405,13 @@ Show = (function() {
     this.audienceText = this.add.bitmapText(this.game.width / 2, this.game.height / 2, 'minecraftia', this.reactionText);
     this.audienceText.tint = 0xFFFF00;
     this.audienceText.align = 'center';
-    return this.audienceText.x = this.game.width / 2 - this.audienceText.textWidth / 2;
+    this.audienceText.x = this.game.width / 2 - this.audienceText.textWidth / 2;
+    this.cheerButton = this.game.add.button(200, this.game.height - 80, 'cheerButton', this.cheerHandler, this, 2, 1, 0);
+    return this.booButton = this.game.add.button(this.game.width - 300, this.game.height - 80, 'booButton', this.booHandler, this, 2, 1, 0);
   };
 
   Show.prototype.update = function() {
-    var noise, puppet, _i, _len, _ref, _results;
-    noise = this.game.mic.getSamples();
-    if (this.game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR) || noise > 0) {
-      this.audienceText.text = this.reactionText;
-      this.pubsub.publish({
-        agent: 'director',
-        functor: 'input',
-        value: 'noise'
-      });
-    } else {
-      this.audienceText.text = "";
-    }
+    var puppet, _i, _len, _ref, _results;
     _ref = this.puppets;
     _results = [];
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -1407,6 +1419,15 @@ Show = (function() {
       _results.push(puppet.update());
     }
     return _results;
+
+    /*
+    noise = @game.mic.getSamples()
+    if @game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR) or noise > 0
+      @audienceText.text = @reactionText
+      @pubsub.publish {agent: 'director', functor: 'input', value: 'noise'}
+    else
+      @audienceText.text = ""
+     */
   };
 
   return Show;

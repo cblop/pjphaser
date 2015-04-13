@@ -40,7 +40,7 @@ class PubSub
     #msg = $iq({type: 'set', from: @conn.jid, to: 'pubsub@' + 'localhost'}).c('pubsub', {xmlns: 'http://jabber.org/protocol/pubsub'}).c('publish', {node: @node}).list('item', [message])
     #console.log msg.toString()
     #jsonString = '{&quot;AGENT&quot; &quot;test&quot; &quot;FUNCTOR&quot; &quot;say&quot; &quot;VALUE&quot; &quot;test&quot;}'
-    jsonString = '{"AGENT": "' + message.agent + '", "FUNCTOR": "' + message.functor + '", "VALUE": "' + message.value + '"}'
+    jsonString = '{"AGENT": "' + message.agent + '", "FUNCTOR": "' + message.functor + '", "VALUE": ["' + message.value + ']"}'
     #jsonString = "Test string"
 
     #json = document.createElement("JSON")

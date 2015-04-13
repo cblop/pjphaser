@@ -25,6 +25,7 @@
     "browserify-shim": "~3.4.1",
     "browserify": "~3.36.0",
     "coffeeify": "~0.6.0",
+    "coffee-script": "~1.8.0",
     "connect": "~2.14.3",
     "gulp-changed": "~0.3.0",
     "gulp-compass": "~1.1.8",
