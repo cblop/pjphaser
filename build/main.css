@@ -13,8 +13,12 @@ html, body {
 }
 
 /* line 13, ../src/sass/main.scss */
+canvas {
+  margin: 0 auto;
+}
+
+/* line 15, ../src/sass/main.scss */
 #pj-coffee {
-  width: 800px;
-  margin: 20px auto;
+  margin: 0 auto;
   cursor: pointer;
 }

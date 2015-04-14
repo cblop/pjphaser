@@ -10,8 +10,9 @@ html, body {
   background: #000;
 }
 
+canvas { margin: 0 auto; }
+
 #pj-coffee {
-  width: 800px;
-  margin: 20px auto;
+  margin: 0 auto;
   cursor: pointer;
 }

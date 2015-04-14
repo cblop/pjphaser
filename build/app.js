@@ -1162,17 +1162,9 @@ Boot = (function() {
   Boot.prototype.create = function() {
     this.game.input.maxPointers = 1;
     this.game.stage.backgroundColor = '#ff0000';
-    if (this.game.device.desktop) {
-      this.game.scale.pageAlignHorizontally = true;
-    } else {
-      this.game.scaleMode = Phaser.ScaleManager.SHOW_ALL;
-      this.game.scale.minWidth = 480;
-      this.game.scale.minHeight = 260;
-      this.game.scale.maxWidth = 1600;
-      this.game.scale.maxHeight = 1200;
-      this.game.scale.forceLandscape = true;
-      this.game.scale.setScreenSize(true);
-    }
+    this.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
+    this.scale.pageAlignVertically = true;
+    this.scale.setScreenSize(true);
     return this.game.state.start('preloader');
   };
 
