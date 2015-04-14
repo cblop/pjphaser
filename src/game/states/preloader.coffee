@@ -21,6 +21,7 @@ class Preloader
     @load.spritesheet 'joey', 'assets/images/joey.png', 512, 512
     @load.spritesheet 'baby', 'assets/images/baby.png', 512, 512
     @load.spritesheet 'croc', 'assets/images/croc.png', 512, 512
+    @load.spritesheet 'sausages', 'assets/images/sausages.png', 250, 347
 
     @load.bitmapFont 'minecraftia', 'assets/fonts/minecraftia.png', 'assets/fonts/minecraftia.xml'
 
@@ -29,12 +30,14 @@ class Preloader
     @load.audio 'joey', 'assets/sounds/joey.mp3', 'assets/sounds/joey.ogg'
     @load.audio 'baby', 'assets/sounds/baby.mp3', 'assets/sounds/baby.ogg'
     @load.audio 'police', 'assets/sounds/police.mp3', 'assets/sounds/police.ogg'
+    @load.audio 'croc', 'assets/sounds/croc.mp3', 'assets/sounds/croc.ogg'
 
     @load.text 'punch', 'assets/sounds/punch.csv'
     @load.text 'judy', 'assets/sounds/judy.csv'
     @load.text 'joey', 'assets/sounds/joey.csv'
     @load.text 'baby', 'assets/sounds/baby.csv'
     @load.text 'police', 'assets/sounds/police.csv'
+    @load.text 'croc', 'assets/sounds/croc.csv'
 
   create: ->
     @asset.cropEnabled = false

@@ -623,7 +623,36 @@ AnimEvent = (function(_super) {
 module.exports = AnimEvent;
 
 
-},{"./event":5}],5:[function(require,module,exports){
+},{"./event":6}],5:[function(require,module,exports){
+var AskEvent, Event,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+Event = require('./event');
+
+AskEvent = (function(_super) {
+  __extends(AskEvent, _super);
+
+  function AskEvent(puppet, delay, speech) {
+    this.puppet = puppet;
+    this.delay = delay;
+    this.speech = speech;
+    AskEvent.__super__.constructor.apply(this, arguments);
+  }
+
+  AskEvent.prototype.trigger = function() {
+    this.puppet.sayLine(this.speech);
+    return this.puppet.anim = "front";
+  };
+
+  return AskEvent;
+
+})(Event);
+
+module.exports = AskEvent;
+
+
+},{"./event":6}],6:[function(require,module,exports){
 var Event;
 
 Event = (function() {
@@ -641,7 +670,7 @@ Event = (function() {
 module.exports = Event;
 
 
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 var EventHandler;
 
 EventHandler = (function() {
@@ -661,7 +690,42 @@ EventHandler = (function() {
 module.exports = EventHandler;
 
 
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
+var Item;
+
+Item = (function() {
+  function Item(name, sprite) {
+    this.name = name;
+    this.sprite = sprite;
+    this.owner = "";
+  }
+
+  Item.prototype.bind = function(puppet) {
+    return this.owner = puppet;
+  };
+
+  Item.prototype.eaten = function() {
+    this.owner = "";
+    return this.sprite.x = OFFSTAGERIGHT;
+  };
+
+  Item.prototype.update = function() {
+    if (this.owner !== "") {
+      this.sprite.x = this.owner.sprite.x;
+      return this.sprite.animations.play("carried");
+    } else {
+      return this.sprite.animations.play("dropped");
+    }
+  };
+
+  return Item;
+
+})();
+
+module.exports = Item;
+
+
+},{}],9:[function(require,module,exports){
 window.onload = function() {
   'use strict';
   var Phaser, game;
@@ -685,9 +749,11 @@ window.onload = function() {
 };
 
 
-},{"./states/boot":13,"./states/error":14,"./states/menu":15,"./states/preloader":16,"./states/show":17,"phaser":1}],8:[function(require,module,exports){
-var MicInput,
+},{"./states/boot":15,"./states/error":16,"./states/menu":17,"./states/preloader":18,"./states/show":19,"phaser":1}],10:[function(require,module,exports){
+var Meyda, MicInput,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+
+Meyda = require('meyda');
 
 MicInput = (function() {
   function MicInput(conf) {
@@ -752,7 +818,7 @@ MicInput = (function() {
 module.exports = MicInput;
 
 
-},{}],9:[function(require,module,exports){
+},{"meyda":20}],11:[function(require,module,exports){
 var Event, MoveEvent,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -780,8 +846,8 @@ MoveEvent = (function(_super) {
 module.exports = MoveEvent;
 
 
-},{"./event":5}],10:[function(require,module,exports){
-var AnimEvent, MoveEvent, PubSub, STROPHE, SpeakEvent, StrPub,
+},{"./event":6}],12:[function(require,module,exports){
+var AnimEvent, AskEvent, MoveEvent, PubSub, STROPHE, SpeakEvent, StrPub,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
 STROPHE = require('strophe');
@@ -791,6 +857,8 @@ StrPub = require('pubsub');
 MoveEvent = require('./moveEvent');
 
 SpeakEvent = require('./speakEvent');
+
+AskEvent = require('./askEvent');
 
 AnimEvent = require('./animEvent');
 
@@ -805,7 +873,7 @@ PubSub = (function() {
     this.onEvent = __bind(this.onEvent, this);
     this.onPublished = __bind(this.onPublished, this);
     this.onConnect = __bind(this.onConnect, this);
-    this.node = 'NODE_PERCEPT';
+    this.node = 'ab';
     this.conn = new Strophe.Connection(this.server);
     this.conn.connect('anim@localhost', 'animuser', this.onConnect);
   }
@@ -841,7 +909,7 @@ PubSub = (function() {
   PubSub.prototype.publish = function(message, onPublished) {
     var jsonString, msg, xml;
     this.onPublished = onPublished;
-    jsonString = '{"AGENT": "' + message.agent + '", "FUNCTOR": "' + message.functor + '", "VALUE": ["' + message.value + ']"}';
+    jsonString = '{"AGENT":"' + message.agent + '","FUNCTOR":"' + message.functor + '","VALUE":["' + message.value + '"]}';
     xml = $build('JSON', {}).t(jsonString).tree();
     msg = {
       attrs: {},
@@ -860,7 +928,7 @@ PubSub = (function() {
     eventObj = JSON.parse(jsonString);
     functor = eventObj['FUNCTOR'];
     agent = eventObj['AGENT'];
-    value = eventObj['VALUE'];
+    value = eventObj['VALUE'][0];
     puppet = this.context.punch;
     _ref = this.context.puppets;
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -897,8 +965,17 @@ PubSub = (function() {
       this.eventHandler.addEvent(mv);
     } else if (functor === 'say') {
       this.eventHandler.addEvent(new SpeakEvent(puppet, 0, value));
+    } else if (functor === 'ask') {
+      this.eventHandler.addEvent(new AskEvent(puppet, 0, "ask-" + value));
+      this.eventHandler.addEvent(new AnimEvent(puppet, 3000, "rest"));
     } else if (functor === 'anim') {
       this.eventHandler.addEvent(new AnimEvent(puppet, 0, value));
+    } else if (functor === 'drop') {
+      this.context.sausages.bind("");
+    } else if (functor === 'carry') {
+      this.context.sausages.bind(puppet);
+    } else if (functor === 'eat') {
+      this.context.sausages.eaten;
     } else if (functor === 'emotion') {
       puppet.emotion = value;
     }
@@ -911,9 +988,9 @@ PubSub = (function() {
     this.conn.addHandler(this.onEvent, null, 'message', null, null, null);
     this.conn.addHandler(this.debugHandler, null, null, null, null, null);
     return this.publish({
-      agent: 'director',
-      functor: 'start',
-      value: 'start'
+      agent: 'inst',
+      functor: 'startScene',
+      value: 'sausages'
     });
   };
 
@@ -933,7 +1010,7 @@ PubSub = (function() {
 module.exports = PubSub;
 
 
-},{"./animEvent":4,"./moveEvent":9,"./speakEvent":12,"pubsub":3,"strophe":2}],11:[function(require,module,exports){
+},{"./animEvent":4,"./askEvent":5,"./moveEvent":11,"./speakEvent":14,"pubsub":3,"strophe":2}],13:[function(require,module,exports){
 var Puppet;
 
 Puppet = (function() {
@@ -1044,7 +1121,7 @@ Puppet = (function() {
 module.exports = Puppet;
 
 
-},{}],12:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 var Event, SpeakEvent,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -1072,7 +1149,7 @@ SpeakEvent = (function(_super) {
 module.exports = SpeakEvent;
 
 
-},{"./event":5}],13:[function(require,module,exports){
+},{"./event":6}],15:[function(require,module,exports){
 var Boot;
 
 Boot = (function() {
@@ -1106,7 +1183,7 @@ Boot = (function() {
 module.exports = Boot;
 
 
-},{}],14:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 var Error;
 
 Error = (function() {
@@ -1144,7 +1221,7 @@ Error = (function() {
 module.exports = Error;
 
 
-},{}],15:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 var Menu, MicInput,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
@@ -1191,7 +1268,8 @@ Menu = (function() {
     this.startTxt.align = 'center';
     this.startTxt.tint = 0xffff00;
     this.startTxt.x = this.game.width / 2 - this.startTxt.textWidth / 2;
-    return this.input.onDown.add(this.onDown, this);
+    this.input.onDown.add(this.onDown, this);
+    return this.game.mic = new MicInput(this.conf);
   };
 
   Menu.prototype.conf = function() {
@@ -1211,7 +1289,7 @@ Menu = (function() {
 module.exports = Menu;
 
 
-},{"../micInput":8}],16:[function(require,module,exports){
+},{"../micInput":10}],18:[function(require,module,exports){
 var Preloader;
 
 Preloader = (function() {
@@ -1236,17 +1314,20 @@ Preloader = (function() {
     this.load.spritesheet('joey', 'assets/images/joey.png', 512, 512);
     this.load.spritesheet('baby', 'assets/images/baby.png', 512, 512);
     this.load.spritesheet('croc', 'assets/images/croc.png', 512, 512);
+    this.load.spritesheet('sausages', 'assets/images/sausages.png', 250, 347);
     this.load.bitmapFont('minecraftia', 'assets/fonts/minecraftia.png', 'assets/fonts/minecraftia.xml');
     this.load.audio('punch', 'assets/sounds/punch.mp3', 'assets/sounds/punch.ogg');
     this.load.audio('judy', 'assets/sounds/judy.mp3', 'assets/sounds/judy.ogg');
     this.load.audio('joey', 'assets/sounds/joey.mp3', 'assets/sounds/joey.ogg');
     this.load.audio('baby', 'assets/sounds/baby.mp3', 'assets/sounds/baby.ogg');
     this.load.audio('police', 'assets/sounds/police.mp3', 'assets/sounds/police.ogg');
+    this.load.audio('croc', 'assets/sounds/croc.mp3', 'assets/sounds/croc.ogg');
     this.load.text('punch', 'assets/sounds/punch.csv');
     this.load.text('judy', 'assets/sounds/judy.csv');
     this.load.text('joey', 'assets/sounds/joey.csv');
     this.load.text('baby', 'assets/sounds/baby.csv');
-    return this.load.text('police', 'assets/sounds/police.csv');
+    this.load.text('police', 'assets/sounds/police.csv');
+    return this.load.text('croc', 'assets/sounds/croc.csv');
   };
 
   Preloader.prototype.create = function() {
@@ -1270,11 +1351,13 @@ Preloader = (function() {
 module.exports = Preloader;
 
 
-},{}],17:[function(require,module,exports){
-var EventHandler, MoveEvent, PubSub, Puppet, Show, SpeakEvent,
+},{}],19:[function(require,module,exports){
+var EventHandler, Item, MoveEvent, PubSub, Puppet, Show, SpeakEvent,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
 Puppet = require('../puppet');
+
+Item = require('../item');
 
 MoveEvent = require('../moveEvent');
 
@@ -1312,6 +1395,7 @@ Show = (function() {
     this.crocSprite = this.add.sprite(OFFSTAGERIGHT, y, 'croc');
     this.crocSprite.anchor.setTo(0.5, 0.5);
     this.crocSprite.animations.add('rest', [0], 2, true);
+    this.crocSprite.animations.add('front', [0], 2, true);
     this.crocSprite.animations.add('snap', [0, 1], 10, true);
     this.policeSprite = this.add.sprite(OFFSTAGERIGHT, y, 'police');
     this.policeSprite.anchor.setTo(0.5, 0.5);
@@ -1325,7 +1409,11 @@ Show = (function() {
     this.joeySprite.animations.add('rest', [0], 2, true);
     this.joeySprite.animations.add('front', [2], 2, true);
     this.joeySprite.animations.add('hit', [4, 5], 10, true);
-    return this.joeySprite.animations.add('dead', [6], 2, true);
+    this.joeySprite.animations.add('dead', [6], 2, true);
+    this.sausagesSprite = this.add.sprite(OFFSTAGERIGHT, y + 100, 'sausages');
+    this.sausagesSprite.anchor.setTo(0.5, 0.5);
+    this.sausagesSprite.animations.add('carried', [0], 2, true);
+    return this.sausagesSprite.animations.add('dropped', [1], 2, true);
   };
 
   Show.prototype.addSounds = function() {
@@ -1333,7 +1421,8 @@ Show = (function() {
     this.judySound = this.add.audio('judy');
     this.babySound = this.add.audio('baby');
     this.policeSound = this.add.audio('police');
-    return this.joeySound = this.add.audio('joey');
+    this.joeySound = this.add.audio('joey');
+    return this.crocSound = this.add.audio('croc');
   };
 
   Show.prototype.readFile = function(fname) {
@@ -1363,7 +1452,8 @@ Show = (function() {
     this.judyLines = this.readFile('judy');
     this.babyLines = this.readFile('baby');
     this.policeLines = this.readFile('police');
-    return this.joeyLines = this.readFile('joey');
+    this.joeyLines = this.readFile('joey');
+    return this.crocLines = this.readFile('croc');
   };
 
   Show.prototype.cheerHandler = function() {
@@ -1393,12 +1483,12 @@ Show = (function() {
     this.judy = new Puppet('judy', this.judySprite, this.judyLines, this.judySound);
     this.baby = new Puppet('baby', this.babySprite, this.babyLines, this.babySound);
     this.joey = new Puppet('joey', this.joeySprite, this.joeyLines, this.joeySound);
+    this.croc = new Puppet('croc', this.crocSprite, this.crocLines, this.crocSound);
     this.police = new Puppet('police', this.policeSprite, this.policeLines, this.policeSound);
     this.puppets.push(this.punch);
-    this.puppets.push(this.judy);
-    this.puppets.push(this.baby);
     this.puppets.push(this.joey);
-    this.puppets.push(this.police);
+    this.puppets.push(this.croc);
+    this.sausages = new Item('sausages', this.sausagesSprite);
     this.eh = new EventHandler(this.game);
     this.pubsub = new PubSub('http://localhost:5280/http-bind/', this.eh, this);
     this.add.sprite(0, 0, 'curtains');
@@ -1411,23 +1501,24 @@ Show = (function() {
   };
 
   Show.prototype.update = function() {
-    var puppet, _i, _len, _ref, _results;
+    var noise, puppet, _i, _len, _ref;
     _ref = this.puppets;
-    _results = [];
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
       puppet = _ref[_i];
-      _results.push(puppet.update());
+      puppet.update();
     }
-    return _results;
-
-    /*
-    noise = @game.mic.getSamples()
-    if @game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR) or noise > 0
-      @audienceText.text = @reactionText
-      @pubsub.publish {agent: 'director', functor: 'input', value: 'noise'}
-    else
-      @audienceText.text = ""
-     */
+    this.sausages.update();
+    noise = this.game.mic.getSamples();
+    if (this.game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR) || noise > 0.7) {
+      this.audienceText.text = this.reactionText;
+      return this.pubsub.publish({
+        agent: 'audience',
+        functor: 'response',
+        value: 'cheer'
+      });
+    } else {
+      return this.audienceText.text = "";
+    }
   };
 
   return Show;
@@ -1437,4 +1528,13 @@ Show = (function() {
 module.exports = Show;
 
 
-},{"../eventHandler":6,"../moveEvent":9,"../pubsub":10,"../puppet":11,"../speakEvent":12}]},{},[7])
+},{"../eventHandler":7,"../item":8,"../moveEvent":11,"../pubsub":12,"../puppet":13,"../speakEvent":14}],20:[function(require,module,exports){
+(function (global){
+;__browserify_shim_require__=require;(function browserifyShim(module, exports, require, define, browserify_shim__define__module__export__) {
+"use strict";!function(a,b){function h(a){return a.forEach||(a.forEach=function(a){var b,c=this.length;for(b=0;c>b;b++)a(this[b],b,c)}),a}var f,g,c=Float32Array,d=Math.sqrt,e=function(a){return Math.pow(a,2)};a.isComplexArray=f=function(a){return a!==b&&a.hasOwnProperty!==b&&a.hasOwnProperty("real")&&a.hasOwnProperty("imag")},a.ComplexArray=g=function(a,b){f(a)?(this.ArrayType=a.ArrayType,this.real=new this.ArrayType(a.real),this.imag=new this.ArrayType(a.imag)):(this.ArrayType=b||c,this.real=new this.ArrayType(a),this.imag=new this.ArrayType(this.real.length)),this.length=this.real.length},g.prototype.toString=function(){var a=[];return this.forEach(function(b){a.push("("+b.real.toFixed(2)+","+b.imag.toFixed(2)+")")}),"["+a.join(",")+"]"},g.prototype.map=function(a){var b,c=this.length,d={};for(b=0;c>b;b++)d.real=this.real[b],d.imag=this.imag[b],a(d,b,c),this.real[b]=d.real,this.imag[b]=d.imag;return this},g.prototype.forEach=function(a){var b,c=this.length,d={};for(b=0;c>b;b++)d.real=this.real[b],d.imag=this.imag[b],a(d,b,c)},g.prototype.conjugate=function(){return new g(this).map(function(a){a.imag*=-1})},g.prototype.magnitude=function(){var a=new this.ArrayType(this.length);return this.forEach(function(b,c){a[c]=d(e(b.real)+e(b.imag))}),h(a)}}("undefined"==typeof exports&&(this.complex_array={})||exports),!function(a,b){function i(a){return b.isComplexArray(a)&&a||new c(a)}function j(a,b){var c=a.length;return c&c-1?k(a,b):l(a,b)}function k(a,b){var i,k,l,m,n,p,q,r,s,t,u,v,w,x,e=a.length;if(1===e)return a;for(l=new c(e,a.ArrayType),r=o(e),s=e/r,t=1/f(r),u=new c(s,a.ArrayType),k=0;r>k;k++){for(i=0;s>i;i++)u.real[i]=a.real[i*r+k],u.imag[i]=a.imag[i*r+k];for(s>1&&(u=j(u,b)),p=g(2*d*k/e),q=(b?-1:1)*h(2*d*k/e),m=1,n=0,i=0;e>i;i++)w=u.real[i%s],x=u.imag[i%s],l.real[i]+=m*w-n*x,l.imag[i]+=m*x+n*w,v=m*p-n*q,n=m*q+n*p,m=v}for(i=0;e>i;i++)a.real[i]=t*l.real[i],a.imag[i]=t*l.imag[i];return a}function l(a,b){var f,i,j,k,l,m,o,p,q,r,s,t,u,v,w,x,y,c=a.length;for(j=n(a),k=j.real,l=j.imag,y=1;c>y;){for(p=g(d/y),q=(b?-1:1)*h(d/y),f=0;c/(2*y)>f;f++)for(m=1,o=0,i=0;y>i;i++)s=2*f*y+i,t=s+y,u=k[s],v=l[s],w=m*k[t]-o*l[t],x=o*k[t]+m*l[t],k[s]=e*(u+w),l[s]=e*(v+x),k[t]=e*(u-w),l[t]=e*(v-x),r=m*p-o*q,o=m*q+o*p,m=r;y<<=1}return j}function m(a,b){for(var c=0;b>1;)c<<=1,c+=1&a,a>>=1,b>>=1;return c}function n(a){var d,e,b=a.length,c={};for(e=0;b>e;e++){var f=m(e,b);c.hasOwnProperty(e)||c.hasOwnProperty(f)||(d=a.real[f],a.real[f]=a.real[e],a.real[e]=d,d=a.imag[f],a.imag[f]=a.imag[e],a.imag[e]=d,c[e]=c[f]=!0)}return a}function o(a){for(var b=3,c=f(a);c>=b;){if(0===a%b)return b;b+=2}return a}var c=b.ComplexArray,d=Math.PI,e=Math.SQRT1_2,f=Math.sqrt,g=Math.cos,h=Math.sin;c.prototype.FFT=function(){return j(this,!1)},a.FFT=function(a){return i(a).FFT()},c.prototype.InvFFT=function(){return j(this,!0)},a.InvFFT=function(a){return i(a).InvFFT()},c.prototype.frequencyMap=function(a){return this.FFT().map(a).InvFFT()},a.frequencyMap=function(a,b){return i(a).frequencyMap(b)}}("undefined"==typeof exports&&(this.fft={})||exports,"undefined"==typeof require&&this.complex_array||__browserify_shim_require__("./complex_array"));var Meyda=function(a,b,c,d){var i,e=this,f=c?c:256,g=b,h=!1,j=function(a,b){for(var c=0,d=0,e=0;e<b.length;e++)c+=Math.pow(e,a)*Math.abs(b[e]),d+=b[e];return c/d},k=function(a){for(;0==a%2&&a>1;)a/=2;return 1==a};e.windowingFunction="hanning",e.hanning=new Float32Array(c);for(var l=0;c>l;l++)e.hanning[l]=.5-.5*Math.cos(2*Math.PI*l/(c-1));e.hamming=new Float32Array(c);for(var l=0;c>l;l++)e.hamming[l]=.54-.46*Math.cos(2*Math.PI*(l/c-1));if(e.windowing=function(a,b){var c=new Float32Array(a.length);if("hanning"==b)for(var d=0;d<a.length;d++)c[d]=a[d]*e.hanning[d];else if("hamming"==b)for(var d=0;d<a.length;d++)c[d]=a[d]*e.hamming[d];else if("blackman"==b)for(var d=0;d<a.length;d++)c[d]=a[d]*e.blackman[d];return c},e.setSource=function(a){g=a,g.connect(window.spn)},k(f)&&a)return e.featureInfo={buffer:{type:"array"},rms:{type:"number"},energy:{type:"number"},zcr:{type:"number"},complexSpectrum:{type:"multipleArrays",arrayNames:{1:"real",2:"imag"}},amplitudeSpectrum:{type:"array"},powerSpectrum:{type:"array"},spectralCentroid:{type:"number"},spectralFlatness:{type:"number"},spectralSlope:{type:"number"},spectralRolloff:{type:"number"},spectralSpread:{type:"number"},spectralSkewness:{type:"number"},spectralKurtosis:{type:"number"},loudness:{type:"multipleArrays",arrayNames:{1:"total",2:"specific"}},perceptualSpread:{type:"number"},perceptualSharpness:{type:"number"},mfcc:{type:"array"}},e.featureExtractors={buffer:function(a,b){return b.signal},rms:function(a,b){for(var c=0,d=0;d<b.signal.length;d++)c+=Math.pow(b.signal[d],2);return c/=b.signal.length,c=Math.sqrt(c)},energy:function(a,b){for(var c=0,d=0;d<b.signal.length;d++)c+=Math.pow(Math.abs(b.signal[d]),2);return c},complexSpectrum:function(a,b){return b.complexSpectrum},spectralSlope:function(a,b){for(var c=0,d=0,e=new Float32Array(b.ampSpectrum.length),f=0,g=0,h=0;h<b.ampSpectrum.length;h++){c+=b.ampSpectrum[h];var i=h*b.audioContext.sampleRate/a;e[h]=i,f+=i*i,d+=i,g+=i*b.ampSpectrum[h]}return(b.ampSpectrum.length*g-d*c)/(c*(f-Math.pow(d,2)))},spectralCentroid:function(a,b){return j(1,b.ampSpectrum)},spectralRolloff:function(a,b){for(var c=b.ampSpectrum,d=b.audioContext.sampleRate/(2*(c.length-1)),e=0,f=0;f<c.length;f++)e+=c[f];for(var g=.99*e,h=c.length-1;e>g&&h>=0;)e-=c[h],--h;return(h+1)*d},spectralFlatness:function(a,b){for(var c=b.ampSpectrum,d=0,e=0,f=0;f<c.length;f++)d+=Math.log(c[f]),e+=c[f];return Math.exp(d/c.length)*c.length/e},spectralSpread:function(a,b){var c=b.ampSpectrum;return Math.sqrt(j(2,c)-Math.pow(j(1,c),2))},spectralSkewness:function(a,b){var d=b.ampSpectrum,e=j(1,d),f=j(2,d),g=j(3,d),h=2*Math.pow(e,3)-3*e*f+g,i=Math.pow(Math.sqrt(f-Math.pow(e,2)),3);return h/i},spectralKurtosis:function(a,b){var c=b.ampSpectrum,d=j(1,c),e=j(2,c),f=j(3,c),g=j(4,c),h=-3*Math.pow(d,4)+6*d*e-4*d*f+g,i=Math.pow(Math.sqrt(e-Math.pow(d,2)),4);return h/i},amplitudeSpectrum:function(a,b){return b.ampSpectrum},zcr:function(a,b){for(var c=0,d=0;d<b.signal.length;d++)(b.signal[d]>=0&&b.signal[d+1]<0||b.signal[d]<0&&b.signal[d+1]>=0)&&c++;return c},powerSpectrum:function(a,b){for(var c=new Float32Array(b.ampSpectrum.length),d=0;d<c.length;d++)c[d]=Math.pow(b.ampSpectrum[d],2);return c},loudness:function(a,b){for(var c=new Float32Array(b.ampSpectrum.length),d=24,e=new Float32Array(d),f=0,g=b.ampSpectrum,h=new Int32Array(d+1),i=0;i<c.length;i++)c[i]=i*b.audioContext.sampleRate/a,c[i]=13*Math.atan(c[i]/1315.8)+3.5*Math.atan(Math.pow(c[i]/7518,2));h[0]=0;for(var j=c[b.ampSpectrum.length-1]/d,k=1,i=0;i<b.ampSpectrum.length;i++)for(;c[i]>j;)h[k++]=i,j=k*c[b.ampSpectrum.length-1]/d;h[d]=b.ampSpectrum.length-1;for(var i=0;d>i;i++){for(var l=0,m=h[i];m<h[i+1];m++)l+=g[m];e[i]=Math.pow(l,.23)}for(var i=0;i<e.length;i++)f+=e[i];return{specific:e,total:f}},perceptualSpread:function(a,b){for(var c=b.featureExtractors.loudness(a,b),d=0,e=0;e<c.specific.length;e++)c.specific[e]>d&&(d=c.specific[e]);var f=Math.pow((c.total-d)/c.total,2);return f},perceptualSharpness:function(a,b){for(var c=b.featureExtractors.loudness(a,b),d=c.specific,e=0,f=0;f<d.length;f++)e+=15>f?(f+1)*d[f+1]:.066*Math.exp(.171*(f+1));return e*=.11/c.total},mfcc:function(b,c){for(var d=c.featureExtractors.powerSpectrum(b,c),e=function(a){var b=1125*Math.log(1+a/700);return b},f=function(a){var b=700*(Math.exp(a/1125)-1);return b},g=26,h=new Float32Array(g+2),i=new Float32Array(g+2),j=0,k=a.sampleRate/2,l=e(j),m=e(k),n=m-l,o=n/(g+1),p=Array(g+2),q=0;q<h.length;q++)h[q]=q*o,i[q]=f(h[q]),p[q]=Math.floor((b+1)*i[q]/a.sampleRate);for(var r=Array(g),s=0;s<r.length;s++){r[s]=Array.apply(null,new Array(b/2+1)).map(Number.prototype.valueOf,0);for(var q=p[s];q<p[s+1];q++)r[s][q]=(q-p[s])/(p[s+1]-p[s]);for(var q=p[s+1];q<p[s+2];q++)r[s][q]=(p[s+2]-q)/(p[s+2]-p[s+1])}for(var t=new Float32Array(g),q=0;q<t.length;q++){t[q]=0;for(var s=0;b/2>s;s++)r[q][s]=r[q][s]*d[s],t[q]+=r[q][s];t[q]=Math.log(t[q])}for(var u=Math.PI/g,v=1/Math.sqrt(g),w=Math.sqrt(2/g),x=13,y=new Float32Array(x*g),q=0;x>q;q++)for(var s=0;g>s;s++){var z=q+s*x;y[z]=0==q?v*Math.cos(u*(q+1)*(s+.5)):w*Math.cos(u*(q+1)*(s+.5))}for(var A=new Float32Array(x),u=0;x>u;u++){for(var B=0,C=0;g>C;C++){var z=u+C*x;B+=y[z]*t[C]}A[u]=B/x}return A}},window.spn=a.createScriptProcessor(f,1,1),spn.connect(a.destination),window.spn.onaudioprocess=function(a){var b=a.inputBuffer.getChannelData(0);e.signal=b;var c=e.windowing(e.signal,e.windowingFunction),g=new complex_array.ComplexArray(f);g.map(function(a,b){a.real=c[b]});var j=g.FFT();e.complexSpectrum=j,e.ampSpectrum=new Float32Array(f/2);for(var k=0;f/2>k;k++)e.ampSpectrum[k]=Math.sqrt(Math.pow(j.real[k],2)+Math.pow(j.imag[k],2));"function"==typeof d&&h&&d(e.get(i))},e.start=function(a){i=a,h=!0},e.stop=function(){h=!1},e.audioContext=a,e.get=function(a){if("object"==typeof a){for(var b={},c=0;c<a.length;c++)try{b[a[c]]=e.featureExtractors[a[c]](f,e)}catch(d){console.error(d)}return b}if("string"==typeof a)return e.featureExtractors[a](f,e);throw"Invalid Feature Format"},g.connect(window.spn,0,0),e;throw"undefined"==typeof a?"AudioContext wasn't specified: Meyda will not run.":"Buffer size is not a power of two: Meyda will not run."};
+; browserify_shim__define__module__export__(typeof Meyda != "undefined" ? Meyda : window.Meyda);
+
+}).call(global, undefined, undefined, undefined, undefined, function defineExport(ex) { module.exports = ex; });
+
+}).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}]},{},[9])

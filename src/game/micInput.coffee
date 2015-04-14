@@ -1,3 +1,5 @@
+Meyda = require 'meyda'
+
 class MicInput
   constructor: (@conf) ->
     @enabled = false
@@ -21,6 +23,7 @@ class MicInput
     @conf()
     @audioContext = new AudioContext()
     @microphone = @audioContext.createMediaStreamSource(stream)
+    #@m = new Meyda(@audioContext, @microphone, 512)
     @analyser = @audioContext.createAnalyser()
 
     @analyser.smoothingTimeConstant = 0.3

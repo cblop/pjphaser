@@ -43,7 +43,7 @@ class Menu
 
     @input.onDown.add @onDown, this
 
-    #@game.mic = new MicInput(@conf)
+    @game.mic = new MicInput(@conf)
 
   conf: =>
     @micTxt.text = 'or shouting into the microphone'

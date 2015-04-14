@@ -1,4 +1,5 @@
 Puppet = require '../puppet'
+Item = require '../item'
 MoveEvent = require '../moveEvent'
 SpeakEvent = require '../speakEvent'
 EventHandler = require '../eventHandler'
@@ -29,6 +30,7 @@ class Show
     @crocSprite = @add.sprite OFFSTAGERIGHT, y, 'croc'
     @crocSprite.anchor.setTo 0.5, 0.5
     @crocSprite.animations.add 'rest', [0], 2, true
+    @crocSprite.animations.add 'front', [0], 2, true
     @crocSprite.animations.add 'snap', [0, 1], 10, true
 
     @policeSprite = @add.sprite OFFSTAGERIGHT, y, 'police'
@@ -46,12 +48,18 @@ class Show
     @joeySprite.animations.add 'hit', [4, 5], 10, true
     @joeySprite.animations.add 'dead', [6], 2, true
 
+    @sausagesSprite = @add.sprite OFFSTAGERIGHT, y + 100, 'sausages'
+    @sausagesSprite.anchor.setTo 0.5, 0.5
+    @sausagesSprite.animations.add 'carried', [0], 2, true
+    @sausagesSprite.animations.add 'dropped', [1], 2, true
+
   addSounds: ->
     @punchSound = @add.audio 'punch'
     @judySound = @add.audio 'judy'
     @babySound = @add.audio 'baby'
     @policeSound = @add.audio 'police'
     @joeySound = @add.audio 'joey'
+    @crocSound = @add.audio 'croc'
 
   readFile: (fname) ->
     textBlob = @game.cache.getText fname
@@ -80,6 +88,7 @@ class Show
     @babyLines = @readFile('baby')
     @policeLines = @readFile('police')
     @joeyLines = @readFile('joey')
+    @crocLines = @readFile('croc')
 
   cheerHandler: =>
     @pubsub.publish {agent: 'audience', functor: 'response', value: 'cheer'}
@@ -107,13 +116,17 @@ class Show
     @judy = new Puppet('judy', @judySprite, @judyLines, @judySound)
     @baby = new Puppet('baby', @babySprite, @babyLines, @babySound)
     @joey = new Puppet('joey', @joeySprite, @joeyLines, @joeySound)
+    @croc = new Puppet('croc', @crocSprite, @crocLines, @crocSound)
     @police = new Puppet('police', @policeSprite, @policeLines, @policeSound)
 
     @puppets.push(@punch)
-    @puppets.push(@judy)
-    @puppets.push(@baby)
+    #@puppets.push(@judy)
+    #@puppets.push(@baby)
     @puppets.push(@joey)
-    @puppets.push(@police)
+    @puppets.push(@croc)
+    #@puppets.push(@police)
+
+    @sausages = new Item('sausages', @sausagesSprite)
 
     @eh = new EventHandler(@game)
     @pubsub = new PubSub('http://localhost:5280/http-bind/', @eh, this)
@@ -131,14 +144,14 @@ class Show
 
   update: ->
     puppet.update() for puppet in @puppets
-    ###
+    @sausages.update()
     noise = @game.mic.getSamples()
-    if @game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR) or noise > 0
+    #console.log noise
+    if @game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR) or noise > 0.7
       @audienceText.text = @reactionText
-      @pubsub.publish {agent: 'director', functor: 'input', value: 'noise'}
+      @pubsub.publish {agent: 'audience', functor: 'response', value: 'cheer'}
     else
       @audienceText.text = ""
-    ###
 
 
 

@@ -8,6 +8,7 @@
   "browser": {
     "phaser": "./src/bower_components/phaser-official/build/phaser.min.js",
     "strophe": "./src/bower_components/strophe/strophe.min.js",
+    "meyda": "./src/js/meyda.min.js",
     "pubsub": "./src/bower_components/strophejs-plugins/pubsub/strophe.pubsub.js"
   },
   "browserify": {
@@ -18,6 +19,7 @@
   },
   "browserify-shim": {
     "phaser": "Phaser",
+    "meyda": "Meyda",
     "strophe": "global:STROPHE"
   },
   "devDependencies": {

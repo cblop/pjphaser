@@ -2,11 +2,12 @@ STROPHE = require 'strophe'
 StrPub = require 'pubsub'
 MoveEvent = require './moveEvent'
 SpeakEvent = require './speakEvent'
+AskEvent = require './askEvent'
 AnimEvent = require './animEvent'
 
 class PubSub
   constructor: (@server, @eventHandler, @context) ->
-    @node = 'NODE_PERCEPT'
+    @node = 'ab'
     @conn = new Strophe.Connection(@server)
     @conn.connect 'anim@localhost', 'animuser', @onConnect
     #@conn.connect 'anim@localhost', 'animuser', @onConnect
@@ -40,7 +41,7 @@ class PubSub
     #msg = $iq({type: 'set', from: @conn.jid, to: 'pubsub@' + 'localhost'}).c('pubsub', {xmlns: 'http://jabber.org/protocol/pubsub'}).c('publish', {node: @node}).list('item', [message])
     #console.log msg.toString()
     #jsonString = '{&quot;AGENT&quot; &quot;test&quot; &quot;FUNCTOR&quot; &quot;say&quot; &quot;VALUE&quot; &quot;test&quot;}'
-    jsonString = '{"AGENT": "' + message.agent + '", "FUNCTOR": "' + message.functor + '", "VALUE": ["' + message.value + ']"}'
+    jsonString = '{"AGENT":"' + message.agent + '","FUNCTOR":"' + message.functor + '","VALUE":["' + message.value + '"]}'
     #jsonString = "Test string"
 
     #json = document.createElement("JSON")
@@ -63,7 +64,7 @@ class PubSub
     eventObj = JSON.parse(jsonString)
     functor = eventObj['FUNCTOR']
     agent = eventObj['AGENT']
-    value = eventObj['VALUE']
+    value = eventObj['VALUE'][0]
     #console.log message
 
     puppet = @context.punch
@@ -91,9 +92,22 @@ class PubSub
       #console.log 'puppet: ' + puppet.name + ' says: ' + value
       @eventHandler.addEvent(new SpeakEvent(puppet, 0, value))
 
+    else if functor == 'ask'
+      @eventHandler.addEvent(new AskEvent(puppet, 0, "ask-" + value))
+      @eventHandler.addEvent(new AnimEvent(puppet, 3000, "rest"))
+
     else if functor == 'anim'
       #console.log 'puppet: ' + puppet.name + ' anim: ' + value
       @eventHandler.addEvent(new AnimEvent(puppet, 0, value))
+
+    else if functor == 'drop'
+      @context.sausages.bind ""
+
+    else if functor == 'carry'
+      @context.sausages.bind puppet
+
+    else if functor == 'eat'
+      @context.sausages.eaten
 
     else if functor == 'emotion'
       #console.log 'puppet: ' + puppet.name + ' emotion: ' + value
@@ -107,7 +121,7 @@ class PubSub
     console.log "SUBSCRIBED to " + @node
     @conn.addHandler(@onEvent, null, 'message', null, null, null)
     @conn.addHandler(@debugHandler, null, null, null, null, null)
-    @publish {agent: 'director', functor:'start', value: 'start'}
+    @publish {agent: 'inst', functor:'startScene', value: 'sausages'}
 
   debugHandler:(iq) =>
     #console.log iq
