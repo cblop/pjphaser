@@ -1,6 +1,6 @@
 class Puppet
   constructor: (@name, @sprite, @lines, @audio) ->
-    @debug = true
+    @debug = false
     @speaking = false
     @targ = @sprite.x
     @speed = 10.0

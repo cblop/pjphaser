@@ -20,6 +20,11 @@ Fine. No show for you.;joey/joey
 Please look after these sausages.;joey/joey
 Don't eat them!;joey/joey
 Should I trust him?;joey/joey
+:give
+OK, here you go.;joey/joey
+:take
+I don't trust you;joey/joey
+Hmm. I'll take them with me.;joey/joey
 :violation
 You ate my sausages!;joey/joey
 I will never trust you again. Goodbye.;joey/joey

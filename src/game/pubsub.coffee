@@ -109,6 +109,9 @@ class PubSub
     else if functor == 'eat'
       @context.sausages.eaten
 
+    else if functor == 'scene' and value == 'restart'
+      window.reload()
+
     else if functor == 'emotion'
       #console.log 'puppet: ' + puppet.name + ' emotion: ' + value
       puppet.emotion = value

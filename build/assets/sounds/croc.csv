@@ -1,7 +1,14 @@
-:ask
+:ask-sausages
+Snap snap?;croc/croc
+Snap?;croc/croc
+:take
 Snap snap?;croc/croc
 Snap?;croc/croc
 :chew
 Nom nom nom;croc/croc
 :harm
 Snap!;croc/croc
+:hit
+Snap!;croc/croc
+:ask-hit
+Snap?;croc/croc

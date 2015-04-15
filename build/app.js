@@ -976,6 +976,8 @@ PubSub = (function() {
       this.context.sausages.bind(puppet);
     } else if (functor === 'eat') {
       this.context.sausages.eaten;
+    } else if (functor === 'scene' && value === 'restart') {
+      window.reload();
     } else if (functor === 'emotion') {
       puppet.emotion = value;
     }
@@ -1019,7 +1021,7 @@ Puppet = (function() {
     this.sprite = sprite;
     this.lines = lines;
     this.audio = audio;
-    this.debug = true;
+    this.debug = false;
     this.speaking = false;
     this.targ = this.sprite.x;
     this.speed = 10.0;
@@ -1373,7 +1375,7 @@ Show = (function() {
     this.punchSprite.anchor.setTo(0.5, 0.5);
     this.punchSprite.animations.add('rest', [0], 2, true);
     this.punchSprite.animations.add('front', [2], 2, true);
-    this.punchSprite.animations.add('hit', [4, 5], 10, true);
+    this.punchSprite.animations.add('hit', [4, 5], 5, true);
     this.judySprite = this.add.sprite(OFFSTAGERIGHT, y, 'judy');
     this.judySprite.anchor.setTo(0.5, 0.5);
     this.judySprite.animations.add('rest', [0], 2, true);
@@ -1388,7 +1390,7 @@ Show = (function() {
     this.crocSprite.anchor.setTo(0.5, 0.5);
     this.crocSprite.animations.add('rest', [0], 2, true);
     this.crocSprite.animations.add('front', [0], 2, true);
-    this.crocSprite.animations.add('snap', [0, 1], 10, true);
+    this.crocSprite.animations.add('hit', [0, 1], 5, true);
     this.policeSprite = this.add.sprite(OFFSTAGERIGHT, y, 'police');
     this.policeSprite.anchor.setTo(0.5, 0.5);
     this.policeSprite.animations.add('rest', [0], 2, true);
@@ -1400,7 +1402,7 @@ Show = (function() {
     this.joeySprite.anchor.setTo(0.5, 0.5);
     this.joeySprite.animations.add('rest', [0], 2, true);
     this.joeySprite.animations.add('front', [2], 2, true);
-    this.joeySprite.animations.add('hit', [4, 5], 10, true);
+    this.joeySprite.animations.add('hit', [4, 5], 5, true);
     this.joeySprite.animations.add('dead', [6], 2, true);
     this.sausagesSprite = this.add.sprite(OFFSTAGERIGHT, y + 100, 'sausages');
     this.sausagesSprite.anchor.setTo(0.5, 0.5);

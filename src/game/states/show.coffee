@@ -13,7 +13,7 @@ class Show
     @punchSprite.anchor.setTo 0.5, 0.5
     @punchSprite.animations.add 'rest', [0], 2, true
     @punchSprite.animations.add 'front', [2], 2, true
-    @punchSprite.animations.add 'hit', [4, 5], 10, true
+    @punchSprite.animations.add 'hit', [4, 5], 5, true
 
     @judySprite = @add.sprite OFFSTAGERIGHT, y, 'judy'
     @judySprite.anchor.setTo 0.5, 0.5
@@ -31,7 +31,7 @@ class Show
     @crocSprite.anchor.setTo 0.5, 0.5
     @crocSprite.animations.add 'rest', [0], 2, true
     @crocSprite.animations.add 'front', [0], 2, true
-    @crocSprite.animations.add 'snap', [0, 1], 10, true
+    @crocSprite.animations.add 'hit', [0, 1], 5, true
 
     @policeSprite = @add.sprite OFFSTAGERIGHT, y, 'police'
     @policeSprite.anchor.setTo 0.5, 0.5
@@ -45,7 +45,7 @@ class Show
     @joeySprite.anchor.setTo 0.5, 0.5
     @joeySprite.animations.add 'rest', [0], 2, true
     @joeySprite.animations.add 'front', [2], 2, true
-    @joeySprite.animations.add 'hit', [4, 5], 10, true
+    @joeySprite.animations.add 'hit', [4, 5], 5, true
     @joeySprite.animations.add 'dead', [6], 2, true
 
     @sausagesSprite = @add.sprite OFFSTAGERIGHT, y + 100, 'sausages'
